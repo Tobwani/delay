@@ -265,13 +265,21 @@ body {
     width: 100%;
     min-width: 0;
     max-width: none;
-    max-height: 55vh;
-    max-height: 55dvh;
+    /* nur so hoch wie nötig – Karte bleibt größtenteils sichtbar */
+    max-height: 45vh;
+    max-height: 45dvh;
     border: none;
     border-radius: 18px 18px 0 0;
     box-shadow: 0 -6px 24px rgba(16, 24, 40, 0.18);
     /* Platz für die iPhone-Home-Leiste */
     padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Nur ~2-3 Stopps zeigen, der Rest wird gescrollt. */
+  #stops {
+    flex: 0 1 auto;
+    max-height: 9rem;
+    padding: 0.25rem 0;
   }
 
   /* Griff-Indikator oben am Sheet */
