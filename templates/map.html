@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Live-Karte</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        {% include 'styles/map.css' %}
+    </style>
+</head>
+<body>
+    <div id="info">
+        <div id="info-header">Strecke wird geladen …</div>
+        <ul id="stops"></ul>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        const tripId = "{{ trip_Id }}";
+
+        const map = L.map('map').setView([52.52, 13.40], 11);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19,
+        }).addTo(map);
+
+        const dataLayer = L.layerGroup().addTo(map)
+        const stopsLayer = L.layerGroup();
+        let stopsVisible = false;
+        let fitted = false;
+
+        async function init() {
+          const trip = await fetch(`/api/trip?trip=${encodeURIComponent(tripId)}`).then(r => r.json());
+
+          dataLayer.clearLayers();
+          stopsLayer.clearLayers();
+          document.getElementById('stops').innerHTML = '';
+
+          L.polyline(trip.punkte, {color: '#2563eb', weight: 4}).addTo(dataLayer);
+
+          trip.stops.forEach(s => {
+            L.circleMarker(s.coords, {
+                radius: 6,
+                color: '#fff',
+                weight: 2,
+                fillColor: '#2563eb',
+                fillOpacity: 1,
+            })
+            .bindPopup(s.name)
+            .addTo(stopsLayer);
+          });
+
+          // Aktuelle Bus-Position: currentloc[0].coords ist (lat, lon) – bereits Leaflet-Reihenfolge.
+          if (trip.currentloc && trip.currentloc.length) {
+            const busIcon = L.divIcon({
+              className: 'bus-marker',
+              html: `<div class="bus-marker__inner">${BUS_ICON}</div>`,
+              iconSize: [38, 38],
+              iconAnchor: [19, 19],
+              popupAnchor: [0, -19],
+            });
+            L.marker(trip.currentloc[0].coords, { icon: busIcon, zIndexOffset: 1000 })
+              .bindPopup(trip.richtung ? `${trip.linie} → ${trip.richtung}` : trip.linie)
+              .addTo(dataLayer);
+          }
+          
+          if (!fitted) {
+            map.invalidateSize();
+            const viertel = map.getSize().x / 4;
+            map.fitBounds(trip.punkte, {
+                paddingBottomRight: [viertel, 0],
+            });
+            fitted = true;
+          }
+
+          const header = document.getElementById('info-header');
+          header.innerHTML = '';
+          const line = document.createElement('span');
+          line.className = 'line';
+          line.textContent = trip.linie;
+          header.appendChild(line);
+          if (trip.richtung) {
+            const dest = document.createElement('span');
+            dest.className = 'dest';
+            dest.textContent = trip.richtung;
+            header.appendChild(dest);
+          }
+
+          // Verspätungs-Chip rechts neben der Richtung.
+          const delayChip = document.createElement('span');
+          const delayMin = Math.round(trip.delay || 0);
+          if (delayMin > 0) {
+            delayChip.className = 'delay late';
+            delayChip.textContent = `+${delayMin} min`;
+          } else {
+            delayChip.className = 'delay on-time';
+            delayChip.textContent = 'pünktlich';
+          }
+          header.appendChild(delayChip);
+
+          // Augen-Toggle: blendet die Stop-Marker auf der Karte ein/aus.
+          const toggle = document.createElement('button');
+          toggle.className = 'eye-toggle';
+          toggle.type = 'button';
+          const renderToggle = () => {
+            toggle.innerHTML = stopsVisible ? EYE_ICON : EYE_OFF_ICON;
+            toggle.title = stopsVisible ? 'Haltepunkte ausblenden' : 'Haltepunkte einblenden';
+            toggle.setAttribute('aria-pressed', String(stopsVisible));
+          };
+          toggle.addEventListener('click', () => {
+            stopsVisible = !stopsVisible;
+            if (stopsVisible) {
+              stopsLayer.addTo(map);
+            } else {
+              stopsLayer.remove();
+            }
+            renderToggle();
+          });
+          renderToggle();
+          header.appendChild(toggle);
+
+          // Zeiten in Date-Objekte umrechnen (HH:MM, Tages-Offset bei Mitternacht).
+          const now = new Date();
+          const base = new Date();
+          base.setHours(0, 0, 0, 0);
+          let prevMin = null;
+          let dayOffset = 0;
+          const toDate = (t) => {
+            const m = /^(\d{2}):(\d{2})$/.exec(t || '');
+            if (!m) return null;
+            const minutes = (+m[1]) * 60 + (+m[2]);
+            if (prevMin !== null && minutes < prevMin) dayOffset++;
+            prevMin = minutes;
+            const d = new Date(base);
+            d.setDate(d.getDate() + dayOffset);
+            d.setHours(+m[1], +m[2], 0, 0);
+            return d;
+          };
+
+          const stopsList = document.getElementById('stops');
+          for (const stop of trip.stops) {
+            const li = document.createElement('li');
+            li.className = 'stop';
+
+            const when = toDate(stop.time);
+            if (when && when < now) li.classList.add('stop--past');
+
+            const link = document.createElement('a');
+            link.className = 'stop-link';
+            // Führt auf die Departures-Seite für diese Station.
+            link.href = `/search?stationName=${encodeURIComponent(stop.name)}`;
+
+            const name = document.createElement('span');
+            name.className = 'stop__name';
+            name.textContent = stop.name;
+
+            const time = document.createElement('span');
+            time.className = 'stop__time';
+            time.textContent = stop.time;
+
+            link.append(name, time);
+            li.appendChild(link);
+            stopsList.appendChild(li);
+          }
+        }
+
+        const EYE_ICON =
+          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+        const EYE_OFF_ICON =
+          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+        // Material Design "directions_bus"
+        const BUS_ICON =
+          '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg>';
+
+        init();
+        setInterval(init, 60000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abfahrten / Verspätungen</title>
+  <style>
+    {% include 'styles/index.css' %}
+  </style>
+</head>
+<body>
+  <main class="search-card">
+    <h1 class="search-card__title">Wohin geht's?</h1>
+    <p class="search-card__subtitle">Live-Abfahrten und Verspätungen für deine Station.</p>
+
+    <form class="search-form" action="/search" method="GET">
+      <div class="field">
+        <label for="stationName">Station <span class="field__hint">– den Stations Namen</span></label>
+        <input type="text" name="stationName" id="stationName" placeholder="U Hönow" required>
+      </div>
+
+      <div class="field">
+        <label for="duration">Zeitfenster <span class="field__hint">– nächste X Minuten</span></label>
+        <input type="number" name="duration" id="duration" min="0" placeholder="30">
+      </div>
+
+      <button type="submit" class="submit-btn">Abfahrten suchen</button>
+    </form>
+  </main>
+</body>
+</html>

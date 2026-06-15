@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abfahrten</title>
+  <style>
+    {% include 'styles/departures.css' %}
+  </style>
+</head>
+<body>
+  <h1>Abfahrten</h1>
+
+  {% if error %}
+  <p class="error">{{ error }}</p>
+  {% endif %}
+
+  {% if departures %}
+    <ul class="departures">
+    {% for dep in departures %}
+      <li class="departure">
+        <a href="/map?trip={{ dep.tripId | urlencode }}" class="departure-link">
+          <div class="departure__main">
+            <span class="line"
+              {% if dep.line.color %}style="background: {{ dep.line.color.bg }}; color: {{ dep.line.color.fg }};"{% endif %}>{{ dep.line.name }}</span>
+            <span class="dest">{{ dep.direction }}</span>
+          </div>
+          <div class="departure__meta">
+            <div class="detail-row">
+              <span class="time">{{ dep.time }}</span>
+              {% if dep.delay and dep.delay > 0 %}
+                <span class="delay late">+{{ (dep.delay / 60) | int }} min</span>
+              {% else %}
+                <span class="delay on-time">pünktlich</span>
+              {% endif %}
+            </div>
+            <div class="detail-row">
+              {% if dep.delay and dep.delay > 0 and dep.plannedWhen %}
+                <span class="time time--planned">{{ dep.plannedWhen[11:16] }}</span>
+              {% endif %}
+              {% if dep.platform %}
+                <span class="platform">Gleis {{ dep.platform }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+      </li>
+    {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">Keine Abfahrten gefunden.</p>
+  {% endif %}
+</body>
+</html>

@@ -1,0 +1,194 @@
+/* departures.css — Clean, helles Design für die Abfahrtstafel.
+   Wird in departures.html in einen style-Block eingebunden. */
+
+:root {
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --border: #e4e7eb;
+  --text: #1f2933;
+  --text-muted: #52606d;
+  --accent: #2563eb;
+  --on-time: #15803d;
+  --on-time-bg: #ecfdf3;
+  --late: #c2410c;
+  --late-bg: #fff4ec;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 2rem 1rem;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+  max-width: 640px;
+  margin: 0 auto 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Liste der Abfahrten */
+.departures {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+/* Eine Abfahrt als Card */
+.departure {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+/* Klickbarer Link füllt die Card und trägt das Layout */
+.departure-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.departure__main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+/* Linien-Badge */
+.line {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: 8px;
+}
+
+.dest {
+  font-weight: 600;
+  font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Rechte Seite: Zeit + Status */
+.departure__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.time {
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.time--planned {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Verspätungs-/Status-Chip */
+.delay {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+
+.delay.on-time {
+  color: var(--on-time);
+  background: var(--on-time-bg);
+}
+
+.delay.late {
+  color: var(--late);
+  background: var(--late-bg);
+}
+
+/* Gleis */
+.platform {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Fehler- und Leer-Zustand */
+.error,
+.empty {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+}
+
+.error {
+  color: var(--late);
+  background: var(--late-bg);
+  border: 1px solid #fcd9c2;
+}
+
+.empty {
+  color: var(--text-muted);
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+/* Responsive: schmale Screens */
+@media (max-width: 480px) {
+  body {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .departure-link {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.625rem;
+  }
+
+  .departure__meta {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+  }
+}

@@ -1,0 +1,308 @@
+/* map.css — Styles für die Live-Karte.
+   Designsprache analog zu departures.css.
+   Wird in map.html in einen style-Block eingebunden. */
+
+:root {
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --border: #e4e7eb;
+  --text: #1f2933;
+  --text-muted: #52606d;
+  --accent: #2563eb;
+  --on-time: #15803d;
+  --on-time-bg: #ecfdf3;
+  --late: #c2410c;
+  --late-bg: #fff4ec;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.08);
+  --shadow-card: 0 8px 28px rgba(16, 24, 40, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#map {
+  height: 100vh;
+  height: 100dvh; /* berücksichtigt die Browser-Leiste auf dem Handy */
+  width: 100%;
+}
+
+/* Floating-Card rechts: Abstand oben/unten/rechts, ~1/4 der Breite,
+   Map bleibt in den Abständen sichtbar. */
+#info {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  width: 25%;
+  min-width: 300px;
+  max-width: 440px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+/* Kopfbereich: Linien-Badge + Richtung, bleibt oben fix stehen. */
+#info-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Linien-Badge (wie in departures.css) */
+.line {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: 8px;
+}
+
+.dest {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Verspätungs-/Status-Chip (wie in departures.css) */
+.delay {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.delay.on-time {
+  color: var(--on-time);
+  background: var(--on-time-bg);
+}
+
+.delay.late {
+  color: var(--late);
+  background: var(--late-bg);
+}
+
+/* Augen-Toggle: ganz rechts im Header */
+.eye-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.eye-toggle:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.eye-toggle[aria-pressed="true"] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Scrollbare Stop-Liste als Timeline. */
+#stops {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.5rem 0;
+  list-style: none;
+  -webkit-overflow-scrolling: touch; /* sanftes Scrollen auf iOS */
+  overscroll-behavior: contain; /* kein Mitscrollen/Map-Pan dahinter */
+}
+
+.stop {
+  position: relative;
+  font-size: 0.95rem;
+}
+
+/* Klickbarer Link füllt die ganze Zeile und trägt das Layout. */
+.stop-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 1.25rem 0.55rem 2.75rem;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.stop-link:hover {
+  background: var(--bg);
+}
+
+/* Durchgehende Timeline-Linie */
+.stop::before {
+  content: "";
+  position: absolute;
+  left: 1.65rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--border);
+}
+
+.stop:first-child::before {
+  top: 50%;
+}
+
+.stop:last-child::before {
+  bottom: 50%;
+}
+
+/* Haltepunkt auf der Timeline */
+.stop::after {
+  content: "";
+  position: absolute;
+  left: 1.65rem;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--accent);
+}
+
+/* Vergangene Halte: gefüllter Punkt – zeigt, wo der Zug schon war. */
+.stop--past::after {
+  background: var(--accent);
+}
+
+.stop--past .stop__name {
+  color: var(--text-muted);
+}
+
+.stop__name {
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stop__time {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* Bus-Marker: aktuelle Position auf der Karte. */
+.bus-marker {
+  background: none;
+  border: none;
+}
+
+.bus-marker__inner {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.35);
+}
+
+/* ---------------------------------------------------------------
+   Handy: Card wird zum Bottom-Sheet – Karte oben sichtbar,
+   Infos unten, große Tap-Flächen, sanftes Scrollen.
+   --------------------------------------------------------------- */
+@media (max-width: 640px) {
+  #info {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    max-height: 55vh;
+    max-height: 55dvh;
+    border: none;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -6px 24px rgba(16, 24, 40, 0.18);
+    /* Platz für die iPhone-Home-Leiste */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Griff-Indikator oben am Sheet */
+  #info::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 36px;
+    height: 4px;
+    margin: 0.5rem auto 0;
+    border-radius: 999px;
+    background: var(--border);
+  }
+
+  #info-header {
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+  }
+
+  /* Größere Tap-Flächen für die Stops */
+  .stop-link {
+    padding: 0.8rem 1rem 0.8rem 2.6rem;
+  }
+
+  .stop::before,
+  .stop::after {
+    left: 1.5rem;
+  }
+
+  /* Touch-freundlicher Toggle-Button */
+  .eye-toggle {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+}

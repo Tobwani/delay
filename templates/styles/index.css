@@ -1,0 +1,155 @@
+/* index.css — Startseite mit Suchformular.
+   Designsprache analog zu departures.css / map.css.
+   Wird in index.html in einen style-Block eingebunden. */
+
+:root {
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --border: #e4e7eb;
+  --text: #1f2933;
+  --text-muted: #52606d;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.08);
+  --shadow-card: 0 8px 28px rgba(16, 24, 40, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Such-Card */
+.search-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  padding: 2rem;
+}
+
+.search-card__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.search-card__subtitle {
+  margin: 0 0 1.75rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* Formular */
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.field__hint {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.field input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.field input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.field input:focus {
+  outline: none;
+  background: var(--card);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Hide spinner für number-Inputs (clean look) */
+.field input[type="number"] {
+  -moz-appearance: textfield;
+}
+.field input[type="number"]::-webkit-outer-spin-button,
+.field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Submit-Button */
+.submit-btn {
+  margin-top: 0.4rem;
+  padding: 0.8rem 1rem;
+  font: inherit;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.05s ease;
+}
+
+.submit-btn:hover {
+  background: var(--accent-hover);
+}
+
+.submit-btn:active {
+  transform: translateY(1px);
+}
+
+.submit-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
+}
+
+@media (max-width: 480px) {
+  .search-card {
+    padding: 1.5rem;
+  }
+}
